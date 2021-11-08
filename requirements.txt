@@ -1,0 +1,4 @@
+aiogram ==2/15
+environs ==9.3.4
+gino == 1.0.1
+asyncpg ==0.24.0
