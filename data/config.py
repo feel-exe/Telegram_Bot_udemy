@@ -13,6 +13,11 @@ DB_PASS = env.str("PG_PASS")
 DB_NAME = env.str("DB_NAME")
 DB_HOST = env.str("DB_HOST")
 
+
+DT_BASE = env.str("DATABASE")
+
+POSTGRES_URI = f"postgresql://{DB_USER}:{DB_PASS}@{IP}/{DT_BASE}"
+
 # ____________________
 # import os
 #
