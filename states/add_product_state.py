@@ -16,3 +16,6 @@ class InventoryList(StatesGroup):
 
     # Фото товара
     IL_foto = State()
+
+    # Подтврждение ввода
+    IL_yes_no = State()

@@ -14,7 +14,7 @@ async def add_email(message: types.Message, state: FSMContext):
 async def enter_email(message: types.Message, state: FSMContext):
     email = message.text
     db.update_user_email(email =email, id = message.from_user.id)
-    user =db.select_user(id=message.from_user.id)
+    user = db.select_user(id=message.from_user.id)
     await message.answer(f"Данные были обновлены. Запись в лд : {user}")
     await state.finish()
 

@@ -3,9 +3,23 @@ from aiogram import types
 import re
 
 from aiogram.utils.deep_linking import get_start_link
+from gino.dialects import asyncpg
 
 from filters import IsPrivate
 from loader import dp
+from utils.db_api import quick_commands_user as command_user
+
+
+@dp.message_handler(CommandStart("start"))
+async def bot_start_deep_link(message: types.Message):
+    try:
+        user = await command_user.add_user(
+            full_name=message.from_user.full_name,
+            username=message.from_user.username,
+            telegram_id=message.from_user.id
+        )
+    except asyncpg.exceptions.UniqueViolationError:
+        user = command_user.select_user(telegram_id=message.from_user.id)
 
 
 # нужно испольховать для реферальных ссылок
@@ -23,7 +37,7 @@ from loader import dp
 
 
 # @dp.message_handler(CommandStart(deep_link=re.compile(r"^u[0-9_-]{4,15}$")))
-@dp.message_handler(CommandStart(deep_link=re.compile(r"\d\d\d")),IsPrivate())
+@dp.message_handler(CommandStart(deep_link=re.compile(r"\d\d\d")), IsPrivate())
 async def bot_start_deep_link(message: types.Message):
     deep_link_args = message.get_args()
     await message.answer(f"Привет,  {message.from_user.full_name}! \n"

@@ -14,9 +14,10 @@ async def on_startup(dp):
     await db_gino.on_startup(dp)
     print("Готово")
 
-    # print("Чистим базу")
-    # await db.gino.drop_all()
-    # print("Готово")
+    print("Чистим базу")
+    await db.gino.drop_all()
+
+    print("Готово")
 
     print("Создаем таблицы")
     await db.gino.create_all()
@@ -31,15 +32,6 @@ if __name__ == '__main__':
     from handlers import dp
 
     executor.start_polling(dp, on_startup=on_startup, skip_updates=True)
-
-
-
-
-
-
-
-
-
 
 # import logging
 #

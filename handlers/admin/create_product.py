@@ -1,21 +1,25 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command
+from aiogram.types import ContentType
+from data.config import admins
 
 from loader import dp
 from states.add_product_state import InventoryList
 
 
-# Сделаем фильтр на комманду /test, где не будет указано никакого состояния
-@dp.message_handler(Command("additem"), state=None)
+from utils.db_api import quick_commands_product as command_product
+
+
+@dp.message_handler(Command("additem"), state=None, user_id=admins)
 async def enter_test(message: types.Message):
-    await message.answer("Вы ициализировали добавление товара.\n\n"
+    await message.answer("Вы ициализировали добавление товара\n\n"
                          "Введите название товара")
 
     await InventoryList.IL_name.set()
-    print("enter_test")
 
-@dp.message_handler(state=InventoryList.IL_name)
+
+@dp.message_handler(state=InventoryList.IL_name, user_id=admins)
 async def answer_IL_name(message: types.Message, state: FSMContext):
     product_name = message.text
     await state.update_data(
@@ -26,13 +30,13 @@ async def answer_IL_name(message: types.Message, state: FSMContext):
     product_name = data.get("product_name")
 
     await message.answer("Текущее состояние: \n"
-                         f"1. product_name: {product_name} \n\n"
+                         f"1. product_name:           {product_name} \n\n"
                          "Введите описание товара: ")
 
     await InventoryList.IL_specification.set()
-    print("answer_IL_name")
 
-@dp.message_handler(state=InventoryList.IL_specification)
+
+@dp.message_handler(state=InventoryList.IL_specification, user_id=admins)
 async def answer_IL_specification(message: types.Message, state: FSMContext):
     product_specification = message.text
     await state.update_data(
@@ -44,14 +48,14 @@ async def answer_IL_specification(message: types.Message, state: FSMContext):
     product_specification = data.get("product_specification")
 
     await message.answer("Текущее состояние: \n"
-                         f"1. product_name: {product_name} \n"
-                         f"2. product_specification: {product_specification} \n\n"
+                         f"1. product_name:           {product_name} \n"
+                         f"2. product_specification:  {product_specification} \n\n"
                          "Установите цену: ")
 
     await InventoryList.IL_price.set()
 
 
-@dp.message_handler(state=InventoryList.IL_price)
+@dp.message_handler(state=InventoryList.IL_price, user_id=admins)
 async def answer_IL_specification(message: types.Message, state: FSMContext):
     product_price = message.text
     await state.update_data(
@@ -64,40 +68,55 @@ async def answer_IL_specification(message: types.Message, state: FSMContext):
     product_price = data.get("product_price")
 
     await message.answer("Текущее состояние: \n"
-                         f"1. product_name: {product_name} \n"
-                         f"2. product_specification: {product_specification} \n"
-                         f"3. product_price: {product_price} \n\n"
+                         f"1. product_name:           {product_name} \n"
+                         f"2. product_specification:  {product_specification} \n"
+                         f"3. product_price:          {product_price} \n\n"
                          "Установите фотокарточку товара: ")
 
     await InventoryList.IL_foto.set()
 
 
-@dp.message_handler(state=InventoryList.IL_foto)
-async def answer_IL_specification(message: types.Message, state: FSMContext):
-    # product_foto = message.uploadMedia
-    product_foto = message.text
+# @dp.message_handler()
+@dp.message_handler(state=InventoryList.IL_foto, content_types=ContentType.PHOTO, user_id=admins)
+async def answer_IL_photo(message: types.Message, state: FSMContext):
+    # async def answer_IL_specification(message: types.Message):
+    await message.photo[-1].download()
+
     await state.update_data(
-        {"product_foto": product_foto}
+        {"product_foto_id": message.photo[-1].file_id}
     )
 
     data = await state.get_data()
     product_name = data.get("product_name")
     product_specification = data.get("product_specification")
     product_price = data.get("product_price")
-    product_foto = data.get("product_foto")
 
     await message.answer("Создана карточка товара: \n"
-                         f"1. product_name: {product_name} \n"
-                         f"2. product_specification: {product_specification} \n"
-                         f"3. product_price: {product_price} \n"
-                         f"3. product_foto: {product_foto} \n")
+                         f"1. product_name:           {product_name} \n"
+                         f"2. product_specification:  {product_specification} \n"
+                         f"3. product_price:          {product_price} \n\n"
+                         f"Сохранить данные?   Y/n")
 
-    """
-    требуется написать фгкция по добавлению параметров товара в pgsql
-    """
+    await InventoryList.IL_yes_no.set()
 
 
-    await state.finish()
+@dp.message_handler(state=InventoryList.IL_yes_no, user_id=admins)
+async def answer_IL_specification(message: types.Message, state: FSMContext):
+    yes_no = message.text
 
+    if yes_no.lower() == "n":
+        await message.answer("Ввод обнулен \n\n"
+                             "Начать заново /additem")
+        await state.finish()
 
+    if yes_no.lower() == "y":
+        data = await state.get_data()
+        product_name = data.get("product_name")
+        product_specification = data.get("product_specification")
+        product_price = data.get("product_price")
+        product_foto_id = data.get("product_foto_id")
 
+        await command_product.add_product(name_pr=product_name, specification_pr=product_specification, price_pr=product_price, photo_pr=product_foto_id)
+
+        await message.answer("Товар внесен в БД")
+        await state.finish()
