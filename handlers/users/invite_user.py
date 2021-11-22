@@ -23,7 +23,7 @@ async def bot_start(message: types.Message):
                          f"Заходи в магазин по ссылке \n\n"
                          f"{deep_link}")
 
-    await command_referral.add_referral(user_id=str(message.from_user.id), user_name=str(message.from_user.full_name))
+    await command_referral.add_referral(user_id=message.from_user.id, user_name=str(message.from_user.full_name))
 
 
 # ловим deep_link ссылку
@@ -44,24 +44,25 @@ async def bot_start(message: types.Message):
 async def bot_start_deeplink(message: types.Message):
     # С помощью функции get_args забираем аргументы после команды start. (для примера выше - будет "123")
 
-    deep_link_args = message.get_args()
+    deep_link_args = int(message.get_args())
 
-    print(type(deep_link_args))
-    print(type(message.from_user.id))
+    # print(type(deep_link_args))
+    # print(type(message.from_user.id))
     try:
-        user_ferrer = await command_referral.select_referral(user_id=message.from_user.id)
+        user_referrer = await command_referral.select_referral(user_id=message.from_user.id)
         print(deep_link_args)
         print(type(deep_link_args))
 
-        print(user_ferrer.user_id)
-        print(type(user_ferrer.user_id))
+        print(user_referrer.user_id)
+        print(type(user_referrer.user_id))
 
-        print(user_ferrer.user_id == deep_link_args)
+        print(user_referrer.user_id == deep_link_args)
 
-        if user_ferrer.user_id == deep_link_args:
+        if user_referrer.user_id == deep_link_args:
+            print("bingo")
             await message.answer(f'Привет, {message.from_user.full_name}!\n'
                                      f'Это магазин чудес. \n\n'
-                                     f'Тебя пригласил {user_ferrer}. \n\n'
+                                     # f'Тебя пригласил {user_referrer.user_id}. \n\n'
                                      f'Нажми /help')
         else:
             await message.answer(f'Привет, {message.from_user.full_name}!\n\n'
