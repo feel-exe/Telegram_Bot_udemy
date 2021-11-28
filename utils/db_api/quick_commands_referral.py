@@ -19,7 +19,7 @@ async def select_all_referrals():
     return referral
 
 
-async def select_referral(referer_id: int):
+async def select_referal(referer_id: int):
     referral = await Referral.query.where(Referral.referer_id == referer_id).gino.first()
     return referral
 

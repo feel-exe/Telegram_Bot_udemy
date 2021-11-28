@@ -7,15 +7,16 @@ from gino.dialects import asyncpg
 
 from data.config import admins
 from filters import IsPrivate
+from keyboards.inline.start_button import start_choice
 from loader import dp
-from utils.db_api import quick_commands_user as command_user
+
 from utils.db_api import quick_commands_referral as command_referral
 
 
-@dp.message_handler(CommandStart("start"))
+@dp.message_handler(CommandStart())
 async def bot_start_deep_link(message: types.Message):
     user = message.from_user.id
-
+    print("start_handler")
     try:
         df = await command_referral.select_referral(user_id=user)
         df = df.user_id
@@ -24,7 +25,8 @@ async def bot_start_deep_link(message: types.Message):
 
     if user is not df:
         await message.answer(f'Привет, {message.from_user.full_name}!\n\n'
-                             f'Чтобы использовать этого бота введите код приглашения, либо пройдите по реферальной ссылке!\n'
+                             f'Чтобы использовать этого бота введите код приглашения, либо пройдите по реферальной ссылке!\n',
+                             reply_markup=start_choice
                              )
 
         return

@@ -10,7 +10,7 @@ from utils.db_api import quick_commands_admin as quick_admin
 async def on_startup_notify(dp: Dispatcher):
     for admin in admins:
         try:
-            await dp.bot.send_message(admin, "Бот Запущен и готов к работе с FSM!")
+            await dp.bot.send_message(admin, "Бот Запущен")
 
         except Exception as err:
             logging.exception(err)

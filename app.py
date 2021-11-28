@@ -11,7 +11,7 @@ async def on_startup(dp):
     await on_startup_notify(dp)
 
     # await on_startup_notify(dp)
-    await set_default_commands(dp)
+    # await set_default_commands(dp)
     # await on_startup_notify(dp)
     await db_gino.on_startup(dp)
     #
