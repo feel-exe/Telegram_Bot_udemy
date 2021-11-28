@@ -12,7 +12,7 @@ async def on_startup(dp):
     await set_default_commands(dp)
     # await on_startup_notify(dp)
     await db_gino.on_startup(dp)
-
+    #
     # await db.gino.drop_all()
 
     await db.gino.create_all()

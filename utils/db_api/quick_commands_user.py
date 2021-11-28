@@ -20,7 +20,6 @@ async def select_all_users():
 
 async def select_user(id: int):
     user = await User.query.where(User.id == id).gino.first()
-    print(user)
     return user
 
 

@@ -19,3 +19,7 @@ DT_BASE = env.str("DATABASE")
 POSTGRES_URI = f"postgresql://{DB_USER}:{DB_PASS}@{IP}/{DT_BASE}"
 
 banned_users = [26516516516, 1651, 651651]
+
+allowed_users = [
+    307136400
+]

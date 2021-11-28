@@ -7,7 +7,6 @@ from data.config import admins
 from loader import dp
 from states.add_product_state import InventoryList
 
-
 from utils.db_api import quick_commands_product as command_product
 
 
@@ -58,6 +57,12 @@ async def answer_IL_specification(message: types.Message, state: FSMContext):
 @dp.message_handler(state=InventoryList.IL_price, user_id=admins)
 async def answer_IL_specification(message: types.Message, state: FSMContext):
     product_price = message.text
+    try:
+        product_price = float(product_price)
+    except:
+        product_price = product_price.replace(",", ".")
+        product_price = float(product_price)
+
     await state.update_data(
         {"product_price": product_price}
     )
@@ -116,7 +121,8 @@ async def answer_IL_specification(message: types.Message, state: FSMContext):
         product_price = data.get("product_price")
         product_foto_id = data.get("product_foto_id")
 
-        await command_product.add_product(name_pr=product_name, specification_pr=product_specification, price_pr=product_price, photo_pr=product_foto_id)
+        await command_product.add_product(name_pr=product_name, specification_pr=product_specification,
+                                          price_pr=float(product_price), photo_pr=product_foto_id)
 
         await message.answer("Товар внесен в БД")
         await state.finish()
