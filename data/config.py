@@ -4,7 +4,10 @@ env = Env()
 
 env.read_env()
 
-admins = env.str("ADMINS")
+# admins = env.str("ADMINS")
+admins = [307136400, 307136400]
+
+
 BOT_TOKEN = env.str("BOT_TOKEN")
 IP = env.str("ip")
 

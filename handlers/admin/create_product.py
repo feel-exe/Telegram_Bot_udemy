@@ -116,13 +116,13 @@ async def answer_IL_specification(message: types.Message, state: FSMContext):
 
     if yes_no.lower() == "y":
         data = await state.get_data()
-        product_name = data.get("product_name")
+        product_name = data.get("product_name") 
         product_specification = data.get("product_specification")
         product_price = data.get("product_price")
         product_foto_id = data.get("product_foto_id")
 
-        await command_product.add_product(name_pr=product_name, specification_pr=product_specification,
-                                          price_pr=float(product_price), photo_pr=product_foto_id)
+        await command_product.add_product(name_product=product_name, specification_product=product_specification,
+                                          price_product=float(product_price), cash_photo_product=product_foto_id)
 
         await message.answer("Товар внесен в БД")
         await state.finish()

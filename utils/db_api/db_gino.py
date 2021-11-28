@@ -28,7 +28,7 @@ class BaseModel(db.Model):
 
 
 class TimedBaseModel(BaseModel):
-    __abstract__ = True 
+    __abstract__ = True
 
     created_at = Column(DateTime(True), server_default=db.func.now())
     updated_at = Column(DateTime(True),

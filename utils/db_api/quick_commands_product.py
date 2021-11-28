@@ -4,9 +4,11 @@ from utils.db_api.db_gino import db
 from utils.db_api.schemas.product import Product
 
 
-async def add_product(name_pr: str, specification_pr: str = None, price_pr: float = 0, photo_pr: str = None):
+async def add_product(name_product: str, specification_product: str = None, price_product: float = 0,
+                      cash_photo_product: str = None):
     try:
-        product = Product(name_pr=name_pr, specification_pr=specification_pr, price_pr=price_pr, photo_pr=photo_pr)
+        product = Product(name_product=name_product, specification_product=specification_product,
+                          price_product=price_product, cash_photo_product=cash_photo_product)
         await product.create()
 
     except UniqueViolationError:
@@ -18,8 +20,8 @@ async def select_all_products():
     return products
 
 
-async def select_product(name_pr: int):
-    product = await Product.query.where(Product.name_pr == name_pr).gino.first()
+async def select_product(name_product: int):
+    product = await Product.query.where(Product.name_product == name_product).gino.first()
     return product
 
 
@@ -28,16 +30,5 @@ async def count_products():
     return total
 
 
-async def update_product_specification(name_pr, specification_pr):
-    product = await Product.get(name_pr)
-    await product.update(specification_pr=specification_pr).apply()
-
-
-async def update_product_price(name_pr, price_pr):
-    product = await Product.get(name_pr)
-    await product.update(price_pr=price_pr).apply()
-
-
-async def update_product_photo(name_pr, photo_pr):
-    product = await Product.get(name_pr)
-    await product.update(photo_pr=photo_pr).apply()
+async def delete_product(name_product: int):
+    await Product.query.where(Product.name_product == name_product).gino.delete()

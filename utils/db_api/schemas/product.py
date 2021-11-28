@@ -5,9 +5,9 @@ from utils.db_api.db_gino import TimedBaseModel
 
 class Product(TimedBaseModel):
     __tablename__ = 'products'
-    name_pr = Column(String(100), primary_key=True)
-    specification_pr = Column(String(100))
-    price_pr = Column(FLOAT(precision=6))
-    photo_pr = Column(String(100))
+    name_product = Column(String(100), primary_key=True)
+    specification_product = Column(String(100))
+    price_product = Column(FLOAT(precision=6))
+    cash_photo_product = Column(String(100))
 
     query: sql.Select

@@ -9,11 +9,12 @@ from utils.db_api.quick_commands_user import *
 class ACLMiddleware(BaseMiddleware):
     async def setup_chat(self, data: dict, user: types.User):
         user_id = user.id
-        user_name = user.full_name
-        user = await select_user(id=user_id)
+        user_first_name = user.first_name
+        user_last_name = user.last_name
+        user = await select_user(user_id=user_id)
 
         if user is None:
-            await add_user(id=user_id, name=user_name)
+            await add_user(user_id=user_id, user_first_name=user_first_name, user_last_name=user_last_name)
         else:
             pass
         # await add_user(id=user_id, name = )

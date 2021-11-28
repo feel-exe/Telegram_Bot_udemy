@@ -23,7 +23,9 @@ async def bot_start(message: types.Message):
                          f"Заходи в магазин по ссылке \n\n"
                          f"{deep_link}")
 
-    await command_referral.add_referral(user_id=message.from_user.id, user_name=str(message.from_user.full_name))
+    await command_referral.add_referral(referer_id=message.from_user.id,
+                                        referer_first_name=str(message.from_user.first_name),
+                                        referer_last_name=str(message.from_user.last_name))
 
 
 # Этот хендлер используется для диплинков:
@@ -34,15 +36,15 @@ async def bot_start_deeplink(message: types.Message):
     deep_link_args = int(message.get_args())
 
     try:
-        user_referrer = await command_referral.select_referral(user_id=message.from_user.id)
+        user_referrer = await command_referral.select_referral(referer_id=message.from_user.id)
 
-        if user_referrer.user_id == deep_link_args:
+        if user_referrer.referer_id == deep_link_args:
 
             await message.answer(f'Привет, {message.from_user.full_name}!\n'
                                  f'Это магазин чудес. \n\n'
                                  f'Нажми /help')
             print(user_referrer)
-            await command_referral.update_referral_balance(user_id=user_referrer.user_id, bonus = 10)
+            await command_referral.update_referral_balance(referer_id=user_referrer.referer_id, bonus=10)
 
         else:
             await message.answer(f'Привет, {message.from_user.full_name}!\n\n'
@@ -52,7 +54,3 @@ async def bot_start_deeplink(message: types.Message):
 
     except UniqueViolationError:
         pass
-
-
-
-

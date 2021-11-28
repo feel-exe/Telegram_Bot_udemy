@@ -4,9 +4,9 @@ from utils.db_api.db_gino import db
 from utils.db_api.schemas.admins import Admin
 
 
-async def add_admin(id: int, name: str, email: str = None):
+async def add_admin(admin_id: int, admin_full_name: str = None):
     try:
-        admin = Admin(id=id, name=name, email=email)
+        admin = Admin(admin_id=admin_id, admin_full_name=admin_full_name)
         await admin.create()
 
     except UniqueViolationError:
@@ -19,10 +19,10 @@ async def select_all_users():
 
 
 async def select_user(id: int):
-    admin = await Admin.query.where(Admin.id == id).gino.first()
+    admin = await Admin.query.where(Admin.admin_id == id).gino.first()
     return admin
 
 
 async def count_users():
-    total = await db.func.count(Admin.id).gino.scalar()
+    total = await db.func.count(Admin.admin_id).gino.scalar()
     return total
