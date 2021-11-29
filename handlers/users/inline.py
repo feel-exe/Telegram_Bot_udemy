@@ -34,8 +34,8 @@ async def empty_query(query: types.InlineQuery):
         df = await command_referral.select_referral(user_id=user)
         df = df.user_id
     except:
-        # pass
-        df = admins[0]
+        pass
+
 
     if user is not df:
         await query.answer(

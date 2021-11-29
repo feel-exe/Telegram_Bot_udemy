@@ -26,9 +26,10 @@ async def select_product(name_product: int):
 
 
 async def count_products():
-    total = await db.func.count(Product.name_pr).gino.scalar()
+    total = await db.func.count(Product.name_product).gino.scalar()
     return total
 
 
 async def delete_product(name_product: int):
-    await Product.query.where(Product.name_product == name_product).gino.delete()
+    await Product.delete.where(Product.name_product == name_product).gino.status()
+

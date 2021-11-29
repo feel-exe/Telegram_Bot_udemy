@@ -4,14 +4,14 @@ from aiogram.dispatcher.filters import Command
 from aiogram.types import Message, CallbackQuery
 
 # from keyboards.inline.callback_datas import buy_callback
-from keyboards.inline.start_button import start_choice
+from keyboards.inline.menu_button import menu_choice
 from loader import dp
 
 
 @dp.message_handler(Command("items"))
 async def show_items(message: Message):
     await message.answer(text="Велком ту Магазин Чудес",
-                         reply_markup=start_choice)
+                         reply_markup=menu_choice)
 
 
 # # Попробуйем отловить по встроенному фильтру, где в нашем call.data содержится "pear"

@@ -1,20 +1,86 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command
-from aiogram.types import ContentType
+from aiogram.types import ContentType, CallbackQuery
 from data.config import admins
+from keyboards.inline.menu_button import menu_choice_admins
 
-from loader import dp
+from loader import dp, bot
 from states.add_product_state import InventoryList
+from states.delete_product_state import DeleteList
 
 from utils.db_api import quick_commands_product as command_product
 
 
-@dp.message_handler(Command("additem"), state=None, user_id=admins)
-async def enter_test(message: types.Message):
-    await message.answer("Вы ициализировали добавление товара\n\n"
-                         "Введите название товара")
+@dp.callback_query_handler(text_contains="delete_item_button", state=None, user_id=admins)
+async def call_delete_item_admins(call: CallbackQuery):
+    await call.answer(cache_time=30)
+    text = [
+        "Введи точное название товара\n"
+        "который хочешь удалить"
+    ]
+    await call.message.answer('\n\n'.join(text))
 
+    await DeleteList.DL_name.set()
+
+
+@dp.message_handler(state=DeleteList.DL_name, user_id=admins)
+async def answer_DL_name(message: types.Message, state: FSMContext):
+    product_name = message.text
+    product_for_delete = await command_product.select_product(name_product=product_name)
+    if product_for_delete.name_product == product_name:
+        # await command_product.select_product(name_product=product_name)
+        product_for_delete = await command_product.select_product(name_product=product_name)
+        data_del = await state.get_data()
+        product_name = data_del.get("product_name")
+        product_name = product_for_delete.name_product
+        product_specification = product_for_delete.specification_product
+        product_price = product_for_delete.price_product
+        product_foto_id = product_for_delete.cash_photo_product
+
+        await bot.send_photo(chat_id=message.from_user.id,
+                             photo=product_foto_id,
+                             caption="Создана карточка товара: \n\n"
+                                     f"НАЗВАНИЕ:   {product_name} \n"
+                                     f"ОПИСАНИЕ:   {product_specification} \n"
+                                     f"ЦЕНА:       {product_price} \n\n"
+                                     f"Удалить?   Y/n")
+        await DeleteList.DL_yes_no.set()
+    else:
+        await message.answer("По названию товар не найден",
+                             reply_markup=menu_choice_admins)
+        await state.finish()
+
+
+@dp.message_handler(state=DeleteList.DL_yes_no, user_id=admins)
+async def answer_DL_specification(message: types.Message, state: FSMContext):
+    yes_no = message.text
+
+    if yes_no.lower() == "n":
+        await message.answer("Не удален)",
+                             reply_markup=menu_choice_admins)
+        await state.finish()
+
+    if yes_no.lower() == "y":
+        data_del = await state.get_data()
+        product_name = data_del.get("product_name")
+
+        await command_product.delete_product(name_product=product_name)
+
+        await message.answer("Товар удален",
+                             reply_markup=menu_choice_admins)
+        await state.finish()
+
+
+@dp.callback_query_handler(text_contains="add_item_button", state=None, user_id=admins)
+async def call_add_item_admins(call: CallbackQuery):
+    await call.answer(cache_time=30)
+    text = [
+        f" {call.from_user.first_name}\n\n"
+        "Вы ициализировали добавление товара\n\n"
+        "Введите НАЗВАНИЕ товара"
+    ]
+    await call.message.answer('\n\n'.join(text))
     await InventoryList.IL_name.set()
 
 
@@ -95,12 +161,28 @@ async def answer_IL_photo(message: types.Message, state: FSMContext):
     product_name = data.get("product_name")
     product_specification = data.get("product_specification")
     product_price = data.get("product_price")
+    product_foto_id = data.get("product_foto_id")
 
-    await message.answer("Создана карточка товара: \n"
-                         f"1. product_name:           {product_name} \n"
-                         f"2. product_specification:  {product_specification} \n"
-                         f"3. product_price:          {product_price} \n\n"
-                         f"Сохранить данные?   Y/n")
+    # await message.answer(text="Создана карточка товара: \n"
+    #                      f"{product_name} \n"
+    #                      f"{product_specification} \n"
+    #                      f"{product_price} \n\n"
+    #                      f"Сохранить?   Y/n", )
+
+    await bot.send_photo(chat_id=message.from_user.id,
+                         photo=product_foto_id,
+                         caption="Создана карточка товара: \n\n"
+                                 f"НАЗВАНИЕ:   {product_name} \n"
+                                 f"ОПИСАНИЕ:   {product_specification} \n"
+                                 f"ЦЕНА:       {product_price} \n\n"
+                                 f"Сохранить?   Y/n")
+
+    # await dp.send_photo(chat_id=message.chat_id,
+    #                     text="Создана карточка товара: \n"
+    #                          f"{product_name} \n"
+    #                          f"{product_specification} \n"
+    #                          f"{product_price} \n\n"
+    #                          f"Сохранить?   Y/n", )
 
     await InventoryList.IL_yes_no.set()
 
@@ -110,13 +192,13 @@ async def answer_IL_specification(message: types.Message, state: FSMContext):
     yes_no = message.text
 
     if yes_no.lower() == "n":
-        await message.answer("Ввод обнулен \n\n"
-                             "Начать заново /additem")
+        await message.answer("Ввод остановлен",
+                             reply_markup=menu_choice_admins)
         await state.finish()
 
     if yes_no.lower() == "y":
         data = await state.get_data()
-        product_name = data.get("product_name") 
+        product_name = data.get("product_name")
         product_specification = data.get("product_specification")
         product_price = data.get("product_price")
         product_foto_id = data.get("product_foto_id")
@@ -124,5 +206,6 @@ async def answer_IL_specification(message: types.Message, state: FSMContext):
         await command_product.add_product(name_product=product_name, specification_product=product_specification,
                                           price_product=float(product_price), cash_photo_product=product_foto_id)
 
-        await message.answer("Товар внесен в БД")
+        await message.answer("Товар добавлен в лист товаров",
+                             reply_markup=menu_choice_admins)
         await state.finish()

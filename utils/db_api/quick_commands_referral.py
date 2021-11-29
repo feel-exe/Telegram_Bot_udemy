@@ -38,3 +38,9 @@ async def update_referral_balance(referer_id, bonus: float = bonus):
     new_balance = old_balance + bonus
 
     await referral.update(balance=+new_balance).apply()
+
+
+async def check_referral_balance(referer_id):
+    referral = await Referral.get(referer_id)
+    balance = referral.balance
+    return balance

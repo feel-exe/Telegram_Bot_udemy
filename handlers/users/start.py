@@ -1,35 +1,49 @@
 from aiogram.dispatcher.filters import CommandStart
 from aiogram import types
-import re
-
-from aiogram.utils.deep_linking import get_start_link
-from gino.dialects import asyncpg
 
 from data.config import admins
-from filters import IsPrivate
-from keyboards.inline.start_button import start_choice
+
+from keyboards.inline.menu_button import menu_choice, menu_choice_admins
 from loader import dp
 
 from utils.db_api import quick_commands_referral as command_referral
 
 
+@dp.message_handler(CommandStart(), user_id = admins)
+async def bot_start_deep_link(message: types.Message):
+    user = message.from_user.id
+    try:
+        await command_referral.select_referal(referer_id=user)
+        await message.answer(f"Приветствую {message.from_user.first_name}\n\n"
+                             "Вы вошли как АДМИНИСТРАТОР \n\n"
+                             "Вот небольшой функционал магазина\n"
+                             "Звездочкой ' * ' отмечен  функционал админа",
+                             reply_markup=menu_choice_admins)
+        return
+    except:
+        await message.answer("Бот недоступен. Подключить бота")
+        return
+
 @dp.message_handler(CommandStart())
 async def bot_start_deep_link(message: types.Message):
     user = message.from_user.id
-    print("start_handler")
     try:
-        df = await command_referral.select_referral(user_id=user)
-        df = df.user_id
-    except:
-        df = admins[0]
-
-    if user is not df:
-        await message.answer(f'Привет, {message.from_user.full_name}!\n\n'
-                             f'Чтобы использовать этого бота введите код приглашения, либо пройдите по реферальной ссылке!\n',
-                             reply_markup=start_choice
-                             )
-
+        await command_referral.select_referal(referer_id=user)
+        await message.answer(f"Приветствую {message.from_user.first_name}\n\n"
+                             "Велком ту Магазин чудес\n"
+                             "Вот небольшой функционал магазина",
+                             reply_markup=menu_choice)
         return
+    except:
+        await message.answer("Бот недоступен. Подключить бота")
+        return
+
+
+
+
+
+
+
 
 # нужно испольховать для реферальных ссылок
 # @dp.message_handler(CommandStart(deep_link=re.compile(r"^[a-z0-9_-]{3,15}$")))
