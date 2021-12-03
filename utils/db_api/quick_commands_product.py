@@ -16,9 +16,18 @@ async def add_product(name_product: str, specification_product: str = None, pric
 
 
 async def select_all_products():
-    products = await Product.query.gino.all()
+    products = await Product.query.gino.all(order_by = Product.name_product)
     return products
 
+
+from gino.loader import ModelLoader
+
+
+async def select_sort_all_products():
+    # query = db.select([Product])
+    # query = query.execution_options(loader=Product.load())
+    products_list = await Product.query.order_by(Product.name_product).gino.all()
+    return products_list
 
 async def select_product(name_product: int):
     product = await Product.query.where(Product.name_product == name_product).gino.first()
@@ -31,5 +40,6 @@ async def count_products():
 
 
 async def delete_product(name_product: int):
-    await Product.delete.where(Product.name_product == name_product).gino.status()
+    product = await Product.query.where(Product.name_product == name_product).gino.first()
+    await product.delete()
 

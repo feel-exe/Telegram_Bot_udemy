@@ -6,6 +6,8 @@ from loader import dp, bot
 from utils.db_api import quick_commands_referral as command_referral
 from data.config import admins
 
+from utils.db_api import quick_commands_product as command_product
+
 allowed_users = []
 
 
@@ -25,8 +27,26 @@ allowed_users = []
 #
 #         cache_time=5)
 
+# store_button
+
+
+async def creat_list_product():
+    list_product = await command_product.select_sort_all_products()
+    products_showcase = []
+
+    print("Длина списка товаров", len(list_product))
+    for i in range(len(list_product))+1:
+        type_i = types.InlineQueryResultCachedPhoto(
+            id=f"{i+1}",
+            photo_file_id="AgACAgIAAxkBAAICcV6jF5kAARvDMn99PQuVe9fBg-TKcAACQ64xG0WQGEm4F3v9dsbAAg7Hwg8ABAEAAwIAA3kAA9c_BgABGQQ",
+            description="Описание, которое нигде не отображается!",
+            caption="Тут будет подпись, которая отправится с картинкой, если на нее нажать",
+        ),
+        products_showcase.append(type_i)
+
 
 @dp.inline_handler()
+@dp.inline_handler(text_contains="store_button")
 async def empty_query(query: types.InlineQuery):
     user = query.from_user.id
 
@@ -35,7 +55,6 @@ async def empty_query(query: types.InlineQuery):
         df = df.user_id
     except:
         pass
-
 
     if user is not df:
         await query.answer(

@@ -9,7 +9,7 @@ from loader import dp
 from utils.db_api import quick_commands_referral as command_referral
 
 
-@dp.message_handler(CommandStart(), user_id = admins)
+@dp.message_handler(CommandStart(), user_id=admins)
 async def bot_start_deep_link(message: types.Message):
     user = message.from_user.id
     try:
@@ -24,6 +24,7 @@ async def bot_start_deep_link(message: types.Message):
         await message.answer("Бот недоступен. Подключить бота")
         return
 
+
 @dp.message_handler(CommandStart())
 async def bot_start_deep_link(message: types.Message):
     user = message.from_user.id
@@ -37,13 +38,6 @@ async def bot_start_deep_link(message: types.Message):
     except:
         await message.answer("Бот недоступен. Подключить бота")
         return
-
-
-
-
-
-
-
 
 # нужно испольховать для реферальных ссылок
 # @dp.message_handler(CommandStart(deep_link=re.compile(r"^[a-z0-9_-]{3,15}$")))
