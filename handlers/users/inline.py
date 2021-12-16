@@ -1,62 +1,24 @@
 from aiogram import types
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command, CommandStart
-
+from aiogram.types import CallbackQuery
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from data.config import allowed_users
+# from keyboards.inline.buy_button import buy_choice
 from loader import dp, bot
 from utils.db_api import quick_commands_referral as command_referral
 from data.config import admins
 
+from states.buy_item import Buy_Product
+
 from utils.db_api import quick_commands_product as command_product
-
-allowed_users = []
-
-
-# @dp.inline_handler(text="")
-# async def empty_query(query: types.InlineQuery):
-#     await query.answer(
-#         results=[
-#             types.InlineQueryResultArticle(
-#                 id="unknown",
-#                 title="Введите какой-то запрос",
-#                 input_message_content=types.InputTextMessageContent(
-#                     message_text="Не обязательно жать при этом на кнопку",
-#                     parse_mode="HTML"
-#                 ),
-#             ),
-#         ],
-#
-#         cache_time=5)
-
-# store_button
+from utils.db_api import quick_commands_user as command_user
 
 
-async def creat_list_product():
-    list_product = await command_product.select_sort_all_products()
-    products_showcase = []
-
-    print("Длина списка товаров", len(list_product))
-    for i in range(len(list_product))+1:
-        type_i = types.InlineQueryResultCachedPhoto(
-            id=f"{i+1}",
-            photo_file_id="AgACAgIAAxkBAAICcV6jF5kAARvDMn99PQuVe9fBg-TKcAACQ64xG0WQGEm4F3v9dsbAAg7Hwg8ABAEAAwIAA3kAA9c_BgABGQQ",
-            description="Описание, которое нигде не отображается!",
-            caption="Тут будет подпись, которая отправится с картинкой, если на нее нажать",
-        ),
-        products_showcase.append(type_i)
-
-
-@dp.inline_handler()
-@dp.inline_handler(text_contains="store_button")
+@dp.inline_handler(text="")
 async def empty_query(query: types.InlineQuery):
     user = query.from_user.id
-
-    try:
-        df = await command_referral.select_referral(user_id=user)
-        df = df.user_id
-    except:
-        pass
-
-    if user is not df:
+    if await command_user.check_user(user_id=user) is None:
         await query.answer(
             results=[],
             switch_pm_text="Бот недоступен. Подключить бота",
@@ -64,33 +26,67 @@ async def empty_query(query: types.InlineQuery):
             cache_time=5)
         return
 
-    await query.answer(
-        results=[
-            types.InlineQueryResultArticle(
-                id="1",
-                title="Название, которое отображается в инлайн режиме!",
-                input_message_content=types.InputTextMessageContent(
-                    message_text="Тут какой-то <b>текст</b>, который будет отправлен при нажатии на кнопку",
-                    parse_mode="HTML"
-                ),
-                url="https://core.telegram.org/bots/api#inlinequeryresult",
-                thumb_url="https://apps-cdn.athom.com/app/org.telegram.api.bot/1/1c9f8d07-be07-442d-933d-16fd212a68f1/assets/images/large.png",
-                description="Описание, в инлнайн режиме"
-            ),
-            # types.InlineQueryResultCachedPhoto(
-            #     id="2",
-            #     photo_file_id="AgACAgIAAxkBAAICcV6jF5kAARvDMn99PQuVe9fBg-TKcAACQ64xG0WQGEm4F3v9dsbAAg7Hwg8ABAEAAwIAA3kAA9c_BgABGQQ",
-            #     description="Описание, которое нигде не отображается!",
-            #     caption="Тут будет подпись, которая отправится с картинкой, если на нее нажать",
-            # ),
-            types.InlineQueryResultVideo(
-                id="4",
-                video_url="https://pixabay.com/en/videos/download/video-10737_medium.mp4",
-                caption="Подпись к видео",
-                description="Какое-то описание",
-                title="Название видео",
-                thumb_url="https://i0.wp.com/globaldiversitypractice.com/wp-content/uploads/2018/11/asda.jpg",
-                mime_type="video/mp4",  # Или video/mp4 text/html
-            ),
-        ],
-    )
+    list_product = await command_product.select_sort_all_products()
+    list_range = [i + 1 for i in range(len(list_product))]
+    list_zip = zip(list_range, list_product)
+
+    articles = [types.InlineQueryResultArticle(
+        id=f"{iter}",
+        title=item.name_product,
+        description=f"   {item.price_product} у.е.",
+        hide_url=False,
+        input_message_content=types.InputTextMessageContent(
+            message_text=f"{item.name_product}",
+            parse_mode="HTML",
+        )
+    ) for iter, item in list_zip]
+
+    await query.answer(articles, cache_time=3,
+                       switch_pm_parameter="item")
+
+
+@dp.message_handler()
+async def bot_store_item(message: types.Message):
+    if await command_product.select_product(name_product=message.text) is None:
+        await message.answer("По такому названию ничего не найдено\n"
+                             "Уточни НАЗВАНИЕ ТОВАРА)")
+
+    if await command_product.select_product(name_product=message.text) is not None:
+        product_for_buy = await command_product.select_product(name_product=message.text)
+
+        buy_choice = InlineKeyboardMarkup()
+        buy = f"buy:{product_for_buy}"
+        buy_apples = InlineKeyboardButton(text="Купить", callback_data=buy)
+        buy_choice.insert(buy_apples)
+
+        await bot.send_photo(chat_id=message.chat.id,
+                             photo=product_for_buy.cash_photo_product,
+                             caption=(f"НАЗВАНИЕ:   {product_for_buy.name_product} \n\n"
+                                      f"ОПИСАНИЕ:   {product_for_buy.specification_product} \n\n\n"
+                                      f"ЦЕНА:       {product_for_buy.price_product} \n\n"),
+                             reply_markup=buy_choice
+                             )
+        # await Buy_Product.BP_start.set()
+
+
+@dp.callback_query_handler(text_contains="buy_button")
+async def bot_store_button(call: CallbackQuery):
+    await call.answer(cache_time=30)
+    print(call.data)
+    # text = [
+    #     f" {call.from_user.first_name}\n\n"
+    #     "Вы вошли как АДМИНИСТРАТОР \n\n"
+    #     "Вот небольшой функционал магазина\n"
+    #     "Звездочкой ' * ' отмечен  функционал админа",
+    # ]
+    # await call.message.answer('\n\n'.join(text),
+    #                           reply_markup=menu_choice_admins)
+
+# @dp.callback_query_handlers(state=Buy_Product.BP_start)
+# async def select_quantity(call: CallbackQuery, state: FSMContext):
+#     await call.answer(cache_time=3)
+#     quantity = call.text
+#     await state.update_data(
+#         {"quantity": quantity}
+#     )
+#     await call.message.answer(text="")

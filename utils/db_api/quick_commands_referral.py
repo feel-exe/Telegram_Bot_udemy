@@ -44,3 +44,11 @@ async def check_referral_balance(referer_id):
     referral = await Referral.get(referer_id)
     balance = referral.balance
     return balance
+
+
+async def check_referer(referer_id: int):
+    user = await Referral.query.where(Referral.referer_id == referer_id).gino.first()
+    if user is not None:
+        return True
+    else:
+        return False

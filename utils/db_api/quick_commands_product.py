@@ -16,20 +16,24 @@ async def add_product(name_product: str, specification_product: str = None, pric
 
 
 async def select_all_products():
-    products = await Product.query.gino.all(order_by = Product.name_product)
+    products = await Product.query.gino.all(order_by=Product.name_product)
     return products
 
 
-from gino.loader import ModelLoader
+async def check_product(name_product: int):
+    product = await Product.query.where(Product.name_product == name_product).gino.first()
+    if product is not None:
+        return True
+    else:
+        return False
 
 
 async def select_sort_all_products():
-    # query = db.select([Product])
-    # query = query.execution_options(loader=Product.load())
     products_list = await Product.query.order_by(Product.name_product).gino.all()
     return products_list
 
-async def select_product(name_product: int):
+
+async def select_product(name_product: str):
     product = await Product.query.where(Product.name_product == name_product).gino.first()
     return product
 
@@ -43,3 +47,8 @@ async def delete_product(name_product: int):
     product = await Product.query.where(Product.name_product == name_product).gino.first()
     await product.delete()
 
+
+
+def select_sort_all_products_test():
+    products_list = Product.query.order_by(Product.name_product).gino.all()
+    return products_list

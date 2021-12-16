@@ -8,9 +8,9 @@ store_button = InlineKeyboardButton(text="Выбери свое чудо",
                                     callback_data=menu_callback.new(sub_level="store_button"))
 menu_choice.insert(store_button)
 
-shopping_cart_button = InlineKeyboardButton(text="Корзина",
-                                            callback_data=menu_callback.new(sub_level="shopping_button"))
-menu_choice.insert(shopping_cart_button)
+# shopping_cart_button = InlineKeyboardButton(text="Корзина",
+#                                             callback_data=menu_callback.new(sub_level="shopping_button"))
+# menu_choice.insert(shopping_cart_button)
 
 referal_button = InlineKeyboardButton(text="Реферальная программа",
                                       callback_data=menu_callback.new(sub_level="referal_button"))
@@ -27,9 +27,9 @@ store_button = InlineKeyboardButton(text="Выбери свое чудо",
                                     callback_data=menu_callback.new(sub_level="store_button"))
 menu_choice_admins.insert(store_button)
 
-shopping_cart_button = InlineKeyboardButton(text="Корзина",
-                                            callback_data=menu_callback.new(sub_level="shopping_button"))
-menu_choice_admins.insert(shopping_cart_button)
+# shopping_cart_button = InlineKeyboardButton(text="Корзина",
+#                                             callback_data=menu_callback.new(sub_level="shopping_button"))
+# menu_choice_admins.insert(shopping_cart_button)
 
 referal_button = InlineKeyboardButton(text="Реферальная программа",
                                       callback_data=menu_callback.new(sub_level="referal_button"))

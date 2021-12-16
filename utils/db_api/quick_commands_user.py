@@ -24,5 +24,12 @@ async def select_user(user_id: int):
 
 
 async def count_users():
-    total = await db.func.count(User.id).gino.scalar()
+    total = await db.func.count(User.user_id).gino.scalar()
     return total
+
+async def check_user(user_id: int):
+    user = await User.query.where(User.user_id == user_id).gino.first()
+    if user is not None:
+        return True
+    else:
+        return False

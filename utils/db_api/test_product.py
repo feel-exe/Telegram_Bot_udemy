@@ -45,6 +45,12 @@ async def test():
     count_product = await quick_commands_product.count_products()
     print(f"Всего товаров: {count_product}")
 
+    count_product = await quick_commands_product.check_product(name_product="Котик1")
+    print(f"Наличие товара: {count_product}")
+
+    count_product = await quick_commands_product.check_product(name_product="котик_2")
+    print(f"Наличие товара: {count_product}")
+
     all_product = await quick_commands_product.select_sort_all_products()
     print(f"Сортированные товары   : {all_product[0]}")
     for item in all_product:
